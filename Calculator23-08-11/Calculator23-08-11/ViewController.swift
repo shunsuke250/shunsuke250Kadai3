@@ -53,7 +53,7 @@ class ViewController: UIViewController {
             throw Error.invalidSwitchState
         }
     }
-    
+
     @IBAction func didTapCalculateButton(_ sender: Any) {
         guard let text1 = firstTextField.text,
               let num1 = Int(text1),
@@ -72,4 +72,3 @@ class ViewController: UIViewController {
         }
     }
 }
-
