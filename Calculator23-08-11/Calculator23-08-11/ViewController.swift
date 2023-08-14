@@ -17,14 +17,35 @@ class ViewController: UIViewController {
     @IBOutlet private weak var secondLabel: UILabel!
     @IBOutlet private weak var answerLabel: UILabel!
 
-    enum Error: Swift.Error {
-        case invalidSwitchState
-        case invalidInputNum
+    enum Operator {
+        case plus
+        case minus
+
+        init(isOn: Bool) {
+            if isOn {
+                self = .minus
+            } else {
+                self = .plus
+            }
+        }
+
+        func evaluate(value: Int) -> Int {
+            switch self {
+            case .minus:
+                return -value
+            case .plus:
+                return value
+            }
+        }
     }
 
-    enum Operator {
-        static let plus = false
-        static let minus = true
+    struct CalculationResult {
+        let firstValue: Int
+        let secondValue: Int
+
+        var answerValue: Int {
+            firstValue + secondValue
+        }
     }
 
     override func viewDidLoad() {
@@ -39,19 +60,11 @@ class ViewController: UIViewController {
         secondTextField.keyboardType = .numberPad
     }
 
-    func calculate(num1: Int, num2: Int) throws -> (Int, Int) {
-        switch (firstSwitch.isOn, secondSwitch.isOn) {
-        case (Operator.plus, Operator.plus):
-            return (num1, num2)
-        case (Operator.plus, Operator.minus):
-            return (num1, -num2)
-        case (Operator.minus, Operator.plus):
-            return (-num1, num2)
-        case (Operator.minus, Operator.minus):
-            return (-num1, -num2)
-        default:
-            throw Error.invalidSwitchState
-        }
+    func calculate(num1: Int, num2: Int) -> CalculationResult {
+        CalculationResult(
+            firstValue: Operator(isOn: firstSwitch.isOn).evaluate(value: num1),
+            secondValue: Operator(isOn: secondSwitch.isOn).evaluate(value: num2)
+        )
     }
 
     @IBAction func didTapCalculateButton(_ sender: Any) {
@@ -60,15 +73,13 @@ class ViewController: UIViewController {
               let text2 = secondTextField.text,
               let num2 = Int(text2)
         else {
-            return answerLabel.text = "整数値を入力してください"
+            answerLabel.text = "整数値を入力してください"
+            return
         }
-        do {
-            let answer = try calculate(num1: num1, num2: num2)
-            answerLabel.text = "\(answer.0 + answer.1)"
-            firstLabel.text = "\(answer.0)"
-            secondLabel.text = "\(answer.1)"
-        } catch {
-            print("Fatal Error: 計算に失敗しました")
-        }
+
+        let result = calculate(num1: num1, num2: num2)
+        answerLabel.text = "\(result.answerValue)"
+        firstLabel.text = "\(result.firstValue)"
+        secondLabel.text = "\(result.secondValue)"
     }
 }
